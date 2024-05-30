@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { auth } from './../services/firebaseConfig'; 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LoginScreenProps } from '../types/navigation';
@@ -20,30 +20,45 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     }
   };
 
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    setErrorMessage('');  // Limpa a mensagem de erro ao digitar
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    setErrorMessage('');  // Limpa a mensagem de erro ao digitar
+  };
+
   return (
     <View style={styles.container}>
+      <Image source={require('../../assets/logo.jpeg')} style={styles.logo} />
+      <Text style={styles.title}>Inicie Sessão</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="e-mail"
+        placeholderTextColor="#ffffff"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
       />
       <TextInput
         style={styles.input}
-        placeholder="Senha"
+        placeholder="senha"
+        placeholderTextColor="#ffffff"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={handlePasswordChange}
       />
-      <Button title="Login" onPress={handleLogin} />
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-        <Text style={styles.link}>Esqueceu sua senha?</Text>
+      <TouchableOpacity onPress={handleLogin} style={styles.button}>
+        <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-      <Button
-        title="Register"
-        onPress={() => navigation.navigate('Register')}
-      />
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+      <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.button}>
+        <Text style={styles.buttonText}>Registre-se</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+        <Text style={styles.link}>Esqueceu a senha?</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -51,24 +66,49 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#0a2748',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
+    paddingTop: 30, // Adiciona espaço no topo para mover os itens para cima
+  },
+  logo: {
+    width: 150, // Aumenta a largura em 30%
+    height: 130, // Aumenta a altura em 30%
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 25,
   },
   input: {
-    width: '100%',
-    marginVertical: 10,
+    width: '80%',
+    backgroundColor: '#1c4e80',
+    color: '#ffffff',
     padding: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
     borderRadius: 5,
+    marginBottom: 10,
+  },
+  button: {
+    width: '80%',
+    backgroundColor: '#5eacff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
   },
   error: {
     color: 'red',
     marginTop: 10,
   },
   link: {
-    color: 'blue',
+    color: '#ffffff',
     marginTop: 10,
   },
 });

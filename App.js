@@ -12,7 +12,14 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: '#0a2748' },
+          headerTintColor: '#fff',
+          headerTitle: '', // Remove o título
+          headerShadowVisible: false, // Remove a linha 
+        }}
+      >
         <Stack.Screen name="Login" component={Homescreen} />
         <Stack.Screen name="Register" component={Registerscreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
