@@ -59,6 +59,7 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
       <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
         <Text style={styles.link}>Esqueceu a senha?</Text>
       </TouchableOpacity>
+      <Image source={require('../../assets/agua.png')} style={styles.footerImage} />
     </View>
   );
 }
@@ -75,7 +76,8 @@ const styles = StyleSheet.create({
   logo: {
     width: 150, // Aumenta a largura em 30%
     height: 130, // Aumenta a altura em 30%
-    marginBottom: 20,
+    marginBottom: 30,
+    borderRadius:45
   },
   title: {
     fontSize: 24,
@@ -97,7 +99,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 55,
   },
   buttonText: {
     color: '#ffffff',
@@ -109,6 +111,12 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#ffffff',
-    marginTop: 10,
+    marginTop: 20, // Ajusta o espaçamento acima do link
+  },
+  footerImage: {
+    width: '60%', // Largura total da tela
+    height: 100, // Altura ajustável conforme necessário
+    position: 'absolute',
+    bottom: -11,
   },
 });

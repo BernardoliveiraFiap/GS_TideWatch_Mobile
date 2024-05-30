@@ -1,6 +1,5 @@
-// src/screens/ForgotPasswordScreen.tsx
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { auth } from './../services/firebaseConfig';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { ForgotPasswordScreenProps } from '../types/navigation';
@@ -20,15 +19,24 @@ export default function ForgotPasswordScreen({ navigation }: ForgotPasswordScree
     }
   };
 
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    setMessage('');  // Limpa a mensagem ao digitar
+  };
+
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Redefinir Senha</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#ffffff"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
       />
-      <Button title="Redefinir Senha" onPress={handleResetPassword} />
+      <TouchableOpacity onPress={handleResetPassword} style={styles.button}>
+        <Text style={styles.buttonText}>Redefinir Senha</Text>
+      </TouchableOpacity>
       {message ? <Text style={styles.message}>{message}</Text> : null}
     </View>
   );
@@ -37,17 +45,37 @@ export default function ForgotPasswordScreen({ navigation }: ForgotPasswordScree
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#0a2748',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
+    paddingTop: 80, // Adiciona espaço no topo para mover os itens para cima
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 25,
   },
   input: {
-    width: '100%',
-    marginVertical: 10,
+    width: '80%',
+    backgroundColor: '#1c4e80',
+    color: '#ffffff',
     padding: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
     borderRadius: 5,
+    marginBottom: 10,
+  },
+  button: {
+    width: '80%',
+    backgroundColor: '#5eacff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
   },
   message: {
     color: 'green',
