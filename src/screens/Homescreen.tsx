@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { auth } from './../services/firebaseConfig'; 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LoginScreenProps } from '../types/navigation';
@@ -7,6 +7,7 @@ import { LoginScreenProps } from '../types/navigation';
 export default function Homescreen({ navigation }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async () => {
@@ -30,8 +31,15 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     setErrorMessage('');  // Limpa a mensagem de erro ao digitar
   };
 
+  const toggleSecureTextEntry = () => {
+    setSecureTextEntry(!secureTextEntry);
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <Image source={require('../../assets/logo.jpeg')} style={styles.logo} />
       <Text style={styles.title}>Inicie Sessão</Text>
       <TextInput
@@ -41,14 +49,19 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
         value={email}
         onChangeText={handleEmailChange}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="senha"
-        placeholderTextColor="#ffffff"
-        secureTextEntry
-        value={password}
-        onChangeText={handlePasswordChange}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="senha"
+          placeholderTextColor="#ffffff"
+          secureTextEntry={secureTextEntry}
+          value={password}
+          onChangeText={handlePasswordChange}
+        />
+        <TouchableOpacity onPress={toggleSecureTextEntry} style={styles.icon}>
+          <Text style={styles.iconText}>👁️‍🗨️</Text>
+        </TouchableOpacity>
+      </View>
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
@@ -60,7 +73,7 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
         <Text style={styles.link}>Esqueceu a senha?</Text>
       </TouchableOpacity>
       <Image source={require('../../assets/agua.png')} style={styles.footerImage} />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -71,13 +84,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 30,
-    paddingTop: 30, // Adiciona espaço no topo para mover os itens para cima
+    paddingTop: 30,
   },
   logo: {
-    width: 150, // Aumenta a largura em 30%
-    height: 130, // Aumenta a altura em 30%
+    width: 150,
+    height: 130,
     marginBottom: 30,
-    borderRadius:45
+    borderRadius: 45,
   },
   title: {
     fontSize: 24,
@@ -92,6 +105,21 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '80%',
+    backgroundColor: '#1c4e80',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  icon: {
+    padding: 10,
+  },
+  iconText: {
+    color: '#ffffff',
+    fontSize: 16,
   },
   button: {
     width: '80%',
@@ -111,12 +139,12 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#ffffff',
-    marginTop: 20, // Ajusta o espaçamento acima do link
+    marginTop: 20,
   },
   footerImage: {
-    width: '60%', // Largura total da tela
-    height: 100, // Altura ajustável conforme necessário
+    width: '60%',
+    height: 100,
     position: 'absolute',
-    bottom: -11,
+    bottom: 0,
   },
 });
