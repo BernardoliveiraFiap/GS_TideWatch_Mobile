@@ -1,7 +1,5 @@
-// src/screens/Homescreen.tsx
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { auth } from './../services/firebaseConfig'; 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LoginScreenProps } from '../types/navigation';
@@ -14,6 +12,7 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate('Home');
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
