@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { auth } from './../services/firebaseConfig';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { ForgotPasswordScreenProps } from '../types/navigation';
@@ -38,6 +38,7 @@ export default function ForgotPasswordScreen({ navigation }: ForgotPasswordScree
         <Text style={styles.buttonText}>Redefinir Senha</Text>
       </TouchableOpacity>
       {message ? <Text style={styles.message}>{message}</Text> : null}
+      <Image source={require('../../assets/mergulhador2.jpg')} style={styles.footerImage} />
     </View>
   );
 }
@@ -48,14 +49,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a2748',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 80, // Adiciona espaço no topo para mover os itens para cima
+    padding: 40,
+    paddingTop: 30, // Adiciona espaço no topo para mover os itens para cima
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ffffff',
-    marginBottom: 25,
+    marginBottom: 30,
   },
   input: {
     width: '80%',
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 22,
   },
   button: {
     width: '80%',
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 35,
   },
   buttonText: {
     color: '#ffffff',
@@ -80,5 +81,12 @@ const styles = StyleSheet.create({
   message: {
     color: 'green',
     marginTop: 10,
+  },
+  footerImage: {
+    width: '100%', // Largura ajustável conforme necessário
+    height: 300, // Altura ajustável conforme necessário
+    marginTop: 20,
+    borderRadius: 150,
+    bottom: -12
   },
 });

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a2748',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 20,
+    padding: 30,
     paddingTop: 30, // Adiciona espaço no topo para mover os itens para cima
   },
   logo: {
