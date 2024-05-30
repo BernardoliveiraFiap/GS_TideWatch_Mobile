@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "293414242238",
+    "project_id": "tidewatch-4bb07",
+    "storage_bucket": "tidewatch-4bb07.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:293414242238:android:9df0b2c7a880d76f771bef",
+        "android_client_info": {
+          "package_name": "br.com.tidewatch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "293414242238-knkn2tv16qapiuhfqifl89d8vfbcm8l2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATx6fcoqiPoh2clwBeabeQ6r4a6DG6G9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "293414242238-knkn2tv16qapiuhfqifl89d8vfbcm8l2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
