@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginTop: 20,
   },
-  footerImage: {
+ /* footerImage: {
     width: '60%',
-    height: 100,
+    height: 100,  ESQUECE, ESSA IMAGEM TAVA BUGANDO MUITO QUANDO ERA PARA DIGITAR EMAIL OU SENHA
     position: 'absolute',
     bottom: 0,
-  },
+  }, */
 });
