@@ -1,9 +1,18 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Home() {
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleLogout = () => {
+    // Aqui você pode adicionar a lógica para limpar os dados de autenticação e sair do app
+    Alert.alert("Logged out", "You have been logged out.");
+    setModalVisible(false);
+    // Navegue para a tela de login ou feche o app
+    navigation.navigate('Login');
+  };
 
   return (
     <View style={styles.container}>
@@ -14,7 +23,7 @@ export default function Home() {
         <View style={styles.realTimeContainer}>
           <Text style={styles.realTimeText}>Real Time</Text>
         </View>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => setModalVisible(true)}>
           <Text style={styles.icon}>👤</Text>
         </TouchableOpacity>
       </View>
@@ -32,6 +41,30 @@ export default function Home() {
           <Text style={styles.footerText}>Barcos</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Você quer sair?</Text>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonClose]}
+            onPress={handleLogout}
+          >
+            <Text style={styles.textStyle}>Sair</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonClose]}
+            onPress={() => setModalVisible(!modalVisible)}
+          >
+            <Text style={styles.textStyle}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -97,5 +130,38 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#ffffff',
     fontSize: 16,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+    marginTop: 10,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
