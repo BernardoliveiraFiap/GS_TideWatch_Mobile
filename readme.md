@@ -1,3 +1,10 @@
+# Passos para rodar: 
+
+NPM INSTALL
+
+NPM RUN ANDROID
+
+
 # GlobalSolution_TideWatch
 
 RM551356 Enzo Oliveira 2TDSPF
