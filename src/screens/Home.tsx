@@ -141,10 +141,10 @@ export default function Home() {
           <Text style={styles.footerText}>Home🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Coleta')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Coleta</Text>
+          <Text style={styles.footerText}>Coleta🗑️</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Barcos')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Barcos⛵</Text>
+          <Text style={styles.footerText}>Barco⛵</Text>
         </TouchableOpacity>
       </View>
       <Modal
@@ -234,23 +234,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#011633', // Fundo azul escuro
-    padding: 10,
+    padding: 8, // Reduzido em 20%
     borderRadius: 10,
   },
   markerThumbnail: {
-    fontSize: 54, // Reduzido em 20% de 68
-    margin: 10,
+    fontSize: 40, // Reduzido em 20% de 68
+    margin: 8, // Reduzido em 20%
   },
   markerEmoji: {
-    fontSize: 32, // Reduzido em 20% de 40
+    fontSize: 43, // Reduzido em 20% de 40
   },
   toggleButton: {
     position: 'absolute',
-    right: 10,
+    right: 2,
     top: '50%',
     backgroundColor: '#1c4e80',
     borderRadius: 25,
-    padding: 10,
+    padding: 8, // Reduzido em 20%
   },
   toggleButtonText: {
     fontSize: 20,
