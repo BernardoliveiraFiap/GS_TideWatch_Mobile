@@ -8,7 +8,7 @@ export default function Barcos() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>Barcos</Text>
+        <Text style={styles.headerText}>Barcos⛵</Text>
       </View>
       <View style={styles.card}>
         <Text style={styles.title}>A ajuda está aqui</Text>
@@ -22,13 +22,13 @@ export default function Barcos() {
       </View>
       <View style={styles.footer}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Home</Text>
+          <Text style={styles.footerText}>Home🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Coleta')} style={styles.footerButton}>
           <Text style={styles.footerText}>Coleta</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Barcos')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Barcos</Text>
+          <Text style={styles.footerText}>Barcos⛵</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -38,7 +38,7 @@ export default function Barcos() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a2748',
+    backgroundColor: '#011633',
     justifyContent: 'center', // Centrally aligns the card vertically
     alignItems: 'center', // Centrally aligns the card horizontally
   },

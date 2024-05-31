@@ -80,7 +80,7 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a2748',
+    backgroundColor: '#011633',
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 30,
