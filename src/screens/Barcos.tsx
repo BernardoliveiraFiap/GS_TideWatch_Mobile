@@ -119,7 +119,7 @@ export default function Barcos() {
         />
         {selectedBoat ? (
           <TouchableOpacity onPress={updateBoat} style={styles.addButton}>
-            <Text style={styles.addButtonText}>Update Boat</Text>
+            <Text style={styles.addButtonText}>Atualizar</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={addBoat} style={styles.addButton}>
