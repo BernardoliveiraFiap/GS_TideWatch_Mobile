@@ -57,7 +57,7 @@ Mostra quantos barcos estão em operação em tempo real, conforme o CRUD está 
 
 
 
-## Passos para rodar Como dev:
+## Passos para rodar como dev:
 
 ```bash
 npm install
