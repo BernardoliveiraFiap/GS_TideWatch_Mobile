@@ -212,7 +212,7 @@ export default function Home() {
             <View style={styles.legendContent}>
               <Text style={styles.legendText}>♻️ Lixo marinho</Text>
               <Text style={styles.legendText}>⛵ Barco  automatizado que coleta o lixo</Text>
-              <Text style={styles.legendText}>🚁 Helicóptero que identifica o lixo e reporta  para os barcos</Text>
+              <Text style={styles.legendText}>🚁 Drone que identifica o lixo e reporta  para os barcos</Text>
             </View>
           )}
         </Animated.View>

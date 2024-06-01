@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, ImageBackground, Image } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -40,18 +40,26 @@ export default function Coleta() {
     }
   }, [isFocused]);
 
-  const countByType = (type) => {
-    return markers.filter(marker => marker.type === type).length;
-  };
-
   const toggleInfoCard = () => {
-    setInfoVisible(!infoVisible);
-    Animated.timing(infoAnimation, {
-      toValue: infoVisible ? -500 : 0,
-      duration: 500,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: true,
-    }).start();
+    if (infoVisible) {
+      Animated.timing(infoAnimation, {
+        toValue: 1000,
+        duration: 500,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }).start(() => {
+        setInfoVisible(false);
+        infoAnimation.setValue(-500); // Reset the animation value for the next time the popup opens
+      });
+    } else {
+      setInfoVisible(true);
+      Animated.timing(infoAnimation, {
+        toValue: 0,
+        duration: 500,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }).start();
+    }
   };
 
   return (
@@ -61,9 +69,15 @@ export default function Coleta() {
       </View>
       <ImageBackground source={require('../../assets/marinha1.png')} style={styles.background}>
         <View style={styles.statsContainer}>
-          <Text style={styles.statsText}>Barcos em Operação: {boats.length}</Text>
-          <Text style={styles.statsText}>Pontos de Lixo: {countByType('bottle')}</Text>
-          <Text style={styles.statsText}>Helicópteros Monitorando: {countByType('helicopter')}</Text>
+          <View style={styles.statsBackground}>
+            <Text style={styles.statsText}><Text style={styles.boldText}>Barcos em Operação:</Text> {boats.length}</Text>
+          </View>
+          <View style={styles.statsBackground}>
+            <Text style={styles.statsText}><Text style={styles.boldText}>Pontos de Lixo:</Text> 1</Text>
+          </View>
+          <View style={styles.statsBackground}>
+            <Text style={styles.statsText}><Text style={styles.boldText}>Drones Monitorando:</Text> 1</Text>
+          </View>
         </View>
       </ImageBackground>
       <View style={styles.footer}>
@@ -85,9 +99,8 @@ export default function Coleta() {
           <TouchableOpacity style={styles.closeButton} onPress={toggleInfoCard}>
             <Text style={styles.closeButtonText}>X</Text>
           </TouchableOpacity>
-          <Text style={styles.infoTitle}>ℹ️ Informação</Text>
           <Text style={styles.infoText}>
-            🌊 **Por que não devemos poluir o mar?** 🌊
+            🌊 Por que não devemos poluir o mar?
           </Text>
           <Text style={styles.infoText}>
             A poluição marinha afeta a vida aquática, prejudica a saúde humana e destrói os ecossistemas. Além disso, os plásticos e outros detritos podem matar peixes e aves marinhas.
@@ -98,6 +111,7 @@ export default function Coleta() {
           <Text style={styles.infoText}>
             🙏 Obrigado por sua atenção e tempo!
           </Text>
+          <Image source={require('../../assets/clean.png')} style={styles.image}/>
         </Animated.View>
       )}
     </View>
@@ -127,10 +141,10 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    width:1050,
+    width: '120%',
     backgroundColor: '#88c3fd',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     borderRadius: 1,
     marginBottom: 52,
     marginTop: 0,
@@ -139,12 +153,24 @@ const styles = StyleSheet.create({
   statsContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: -160,
+    paddingTop: 20,
+  },
+  statsBackground: {
+    backgroundColor: 'rgba(255, 255, 255, 0.6)', // Fundo branco semitransparente
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    width: '90%',
   },
   statsText: {
-    color: '#ffffff',
+    color: '#010101',
     fontSize: 18,
-    marginBottom: 10,
+    textAlign: 'center',
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: 'black',
   },
   footer: {
     position: 'absolute',
@@ -174,11 +200,10 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     position: 'absolute',
-    top: '10%',
-    left: '5%',
-    right: '5%',
-    bottom: '10%',
-    backgroundColor: '#ffffff',
+    top: '5%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#1c4e80', // Azul escuro
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
@@ -190,16 +215,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
   infoTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#011633',
+    color: '#ffffff',
     marginBottom: 10,
   },
   infoText: {
     fontSize: 18,
-    color: '#011633',
+    color: '#ffffff',
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -214,5 +241,10 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  image: {
+    width: 410,
+    height: 410,
+    marginTop: 15,
   },
 });
