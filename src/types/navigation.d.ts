@@ -11,10 +11,14 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  Home: undefined;  // Adicionando a tela Home
+  Home: undefined;
+  Barcos: undefined;
+  Coleta: undefined; // Adicionando a tela Coleta
 };
 
 export type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, 'Register'>;
 export type ForgotPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'ForgotPassword'>;
-export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>; // Tipagem para Home
+export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
+export type BarcosScreenProps = NativeStackScreenProps<RootStackParamList, 'Barcos'>;
+export type ColetaScreenProps = NativeStackScreenProps<RootStackParamList, 'Coleta'>;

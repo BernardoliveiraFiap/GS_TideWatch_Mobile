@@ -1,18 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { auth } from './../services/firebaseConfig'; 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LoginScreenProps } from '../types/navigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Homescreen({ navigation }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [rememberEmail, setRememberEmail] = useState(false);
+
+  useEffect(() => {
+    const loadEmail = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem('savedEmail');
+        const remember = await AsyncStorage.getItem('rememberEmail');
+        if (savedEmail && remember === 'true') {
+          setEmail(savedEmail);
+          setRememberEmail(true);
+        }
+      } catch (error) {
+        console.error('Failed to load email from storage', error);
+      }
+    };
+    loadEmail();
+  }, []);
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      if (rememberEmail) {
+        await AsyncStorage.setItem('savedEmail', email);
+        await AsyncStorage.setItem('rememberEmail', 'true');
+      } else {
+        await AsyncStorage.removeItem('savedEmail');
+        await AsyncStorage.setItem('rememberEmail', 'false');
+      }
       navigation.navigate('Home');
     } catch (error) {
       if (error instanceof Error) {
@@ -35,6 +60,18 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     setSecureTextEntry(!secureTextEntry);
   };
 
+  const toggleRememberEmail = async () => {
+    const newRememberEmail = !rememberEmail;
+    setRememberEmail(newRememberEmail);
+    if (newRememberEmail) {
+      await AsyncStorage.setItem('savedEmail', email);
+      await AsyncStorage.setItem('rememberEmail', 'true');
+    } else {
+      await AsyncStorage.removeItem('savedEmail');
+      await AsyncStorage.setItem('rememberEmail', 'false');
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -42,6 +79,12 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     >
       <Image source={require('../../assets/logo.jpeg')} style={styles.logo} />
       <Text style={styles.title}>Inicie Sessão</Text>
+      <View style={styles.rememberEmailContainer}>
+        <TouchableOpacity onPress={toggleRememberEmail} style={[styles.switch, rememberEmail && styles.switchActive]}>
+          {rememberEmail && <View style={styles.switchInner} />}
+        </TouchableOpacity>
+        <Text style={styles.rememberEmailText}>Guardar Email</Text>
+      </View>
       <TextInput
         style={styles.input}
         placeholder="e-mail"
@@ -66,13 +109,12 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-      <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.button}>
+      <TouchableOpacity onPress={() => navigation.navigate('Register')} style={[styles.button, { marginTop: 15 }]}>
         <Text style={styles.buttonText}>Registre-se</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
         <Text style={styles.link}>Esqueceu a senha?</Text>
       </TouchableOpacity>
-      <Image source={require('../../assets/agua.png')} style={styles.footerImage} />
     </KeyboardAvoidingView>
   );
 }
@@ -80,7 +122,7 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a2748',
+    backgroundColor: '#011633',
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 30,
@@ -97,6 +139,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: 25,
+  },
+  rememberEmailContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingVertical: 5,
+  },
+  switch: {
+    width: 30,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  switchActive: {
+    backgroundColor: '#ffffff',
+  },
+  switchInner: {
+    width: 16,
+    height: 16,
+    backgroundColor: '#1c4e80',
+    borderRadius: 8,
+  },
+  rememberEmailText: {
+    color: '#ffffff',
+    marginLeft: 10,
   },
   input: {
     width: '80%',
@@ -127,7 +197,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    marginBottom: 55,
+    marginBottom: 10,
   },
   buttonText: {
     color: '#ffffff',
@@ -141,10 +211,4 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginTop: 20,
   },
- /* footerImage: {
-    width: '60%',
-    height: 100,  ESQUECE, ESSA IMAGEM TAVA BUGANDO MUITO QUANDO ERA PARA DIGITAR EMAIL OU SENHA
-    position: 'absolute',
-    bottom: 0,
-  }, */
 });
