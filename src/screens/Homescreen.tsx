@@ -109,7 +109,7 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-      <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.button}>
+      <TouchableOpacity onPress={() => navigation.navigate('Register')} style={[styles.button, { marginTop: 15 }]}>
         <Text style={styles.buttonText}>Registre-se</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
