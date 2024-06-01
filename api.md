@@ -27,7 +27,7 @@ Exemplo de Requisição:
   "password": "senha123"
 }
 ---------------------------------------------------------------------
-# Registro
+# Registro  (Redefinição de senha é semelhante, porém necessita apenas o email, após colocar o email e clicar em redefinir senha, irá chegar um email do firebase para o usuario)
 POST /api/register
 name (string, obrigatório): O nome do usuário.
 email (string, obrigatório): O email do usuário.
