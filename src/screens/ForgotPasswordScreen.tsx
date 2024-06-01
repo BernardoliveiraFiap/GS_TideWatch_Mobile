@@ -38,7 +38,7 @@ export default function ForgotPasswordScreen({ navigation }: ForgotPasswordScree
         <Text style={styles.buttonText}>Redefinir Senha</Text>
       </TouchableOpacity>
       {message ? <Text style={styles.message}>{message}</Text> : null}
-      <Image source={require('../../assets/mergulhador2.jpg')} style={styles.footerImage} />
+      <Image source={require('../../assets/mergulhador2.png')} style={styles.footerImage} />
     </View>
   );
 }
@@ -46,7 +46,7 @@ export default function ForgotPasswordScreen({ navigation }: ForgotPasswordScree
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a2748',
+    backgroundColor: '#011633',
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 40,
