@@ -1,34 +1,147 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Image, Alert } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Barcos() {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+  const [boats, setBoats] = useState([]);
+  const [task, setTask] = useState('');
+  const [boatId, setBoatId] = useState('');
+  const [date, setDate] = useState('');
+  const [selectedBoat, setSelectedBoat] = useState(null);
+
+  const loadBoats = async () => {
+    try {
+      const storedBoats = await AsyncStorage.getItem('boats');
+      if (storedBoats) {
+        setBoats(JSON.parse(storedBoats));
+      }
+    } catch (error) {
+      console.error('Failed to load boats from storage', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      loadBoats();
+    }
+  }, [isFocused]);
+
+  const addBoat = async () => {
+    if (boats.length >= 3) {
+      Alert.alert('Limit Exceeded', 'You can only add up to 3 boats.');
+      return;
+    }
+    const newBoat = { id: Date.now().toString(), task, boatId, date };
+    const updatedBoats = [...boats, newBoat];
+    setBoats(updatedBoats);
+    try {
+      await AsyncStorage.setItem('boats', JSON.stringify(updatedBoats));
+      navigation.navigate('Home', { addingBoat: true });
+    } catch (error) {
+      console.error('Failed to save boat to storage', error);
+    }
+  };
+
+  const updateBoat = async () => {
+    const updatedBoats = boats.map(boat => 
+      boat.id === selectedBoat.id ? { ...boat, task, boatId, date } : boat
+    );
+    setBoats(updatedBoats);
+    try {
+      await AsyncStorage.setItem('boats', JSON.stringify(updatedBoats));
+      setSelectedBoat(null);
+      setTask('');
+      setBoatId('');
+      setDate('');
+    } catch (error) {
+      console.error('Failed to update boat in storage', error);
+    }
+  };
+
+  const removeBoat = async (id) => {
+    const updatedBoats = boats.filter(boat => boat.id !== id);
+    setBoats(updatedBoats);
+    try {
+      await AsyncStorage.setItem('boats', JSON.stringify(updatedBoats));
+    } catch (error) {
+      console.error('Failed to remove boat from storage', error);
+    }
+  };
+
+  const renderBoat = ({ item }) => (
+    <View style={styles.boatItem}>
+      <Image source={require('../../assets/barco.png')} style={styles.boatImage} />
+      <View style={styles.boatInfo}>
+        <Text style={styles.boatText}>Task: {item.task}</Text>
+        <Text style={styles.boatText}>ID: {item.boatId}</Text>
+        <Text style={styles.boatText}>Date: {item.date}</Text>
+      </View>
+      <TouchableOpacity onPress={() => removeBoat(item.id)} style={styles.removeButton}>
+        <Text style={styles.removeButtonText}>Remove</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => {
+        setSelectedBoat(item);
+        setTask(item.task);
+        setBoatId(item.boatId);
+        setDate(item.date);
+      }} style={styles.updateButton}>
+        <Text style={styles.updateButtonText}>Update</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>Barcos⛵</Text>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.title}>A ajuda está aqui</Text>
-        <Text style={styles.subTitle}>Barco autônomo Coletor de Lixo</Text>
-        <Image source={require('../../assets/barco.png')} style={styles.image} />
-        <View style={styles.taskContainer}>
-          <Text style={styles.taskText}>Tarefas:</Text>
-          <Text style={styles.taskText}>ID:</Text>
-          <Text style={styles.taskText}>DATA:</Text>
-        </View>
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Task"
+          value={task}
+          onChangeText={setTask}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Boat ID"
+          value={boatId}
+          onChangeText={setBoatId}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Date"
+          value={date}
+          onChangeText={setDate}
+        />
+        {selectedBoat ? (
+          <TouchableOpacity onPress={updateBoat} style={styles.addButton}>
+            <Text style={styles.addButtonText}>Update Boat</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={addBoat} style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add Boat</Text>
+          </TouchableOpacity>
+        )}
       </View>
+      <FlatList
+        data={boats}
+        renderItem={renderBoat}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContainer}
+      />
       <View style={styles.footer}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerButton}>
           <Text style={styles.footerText}>Home🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Coleta')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Coleta</Text>
+          <Text style={styles.footerText}>Coleta🗑️</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Barcos')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Barcos⛵</Text>
+          <Text style={styles.footerText}>Barco⛵</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -39,58 +152,98 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#011633',
-    justifyContent: 'center', // Centrally aligns the card vertically
-    alignItems: 'center', // Centrally aligns the card horizontally
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    padding: 20,
   },
   headerContainer: {
-    position: 'absolute',
-    top: 40,
-    paddingHorizontal: 30,
-    paddingVertical: 10,
+    width: '100%',
     backgroundColor: '#1c4e80',
     borderRadius: 25,
+    padding: 10,
+    marginBottom: 20,
+    alignItems: 'center',
   },
   headerText: {
     color: '#ffffff',
     fontSize: 20,
   },
-  card: {
-    width: '90%', // Makes the card wider
-    backgroundColor: '#4a90e2',
-    borderRadius: 10,
-    padding: 20,
+  formContainer: {
+    width: '100%',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    color: '#ffffff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  subTitle: {
-    fontSize: 18,
-    color: '#ffffff',
-    marginBottom: 10,
-  },
-  image: {
-    width: '100%', // Makes the image wider
-    height: 200, // Adjust height accordingly
-    marginBottom: 20,
-  },
-  taskContainer: {
+  input: {
     width: '100%',
     backgroundColor: '#1c4e80',
-    padding: 12,
-    borderRadius: 10,
-  },
-  taskText: {
-    fontSize: 16,
     color: '#ffffff',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  addButton: {
+    width: '100%',
+    backgroundColor: '#5eacff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  addButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  listContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  boatItem: {
+    width: '100%',
+    backgroundColor: '#4a90e2',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  boatImage: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
+  boatInfo: {
+    flex: 1,
+  },
+  boatText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  removeButton: {
+    backgroundColor: '#e74c3c',
+    padding: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 5,
+    marginTop: 5,
+  },
+  removeButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+  },
+  updateButton: {
+    backgroundColor: '#f39c12',
+    padding: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 5,
+    marginTop: 5,
+  },
+  updateButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
   },
   footer: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 9,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     width: '100%',

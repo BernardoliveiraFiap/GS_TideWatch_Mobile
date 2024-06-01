@@ -1,18 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { auth } from './../services/firebaseConfig'; 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LoginScreenProps } from '../types/navigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Homescreen({ navigation }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [rememberEmail, setRememberEmail] = useState(false);
+
+  useEffect(() => {
+    const loadEmail = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem('savedEmail');
+        if (savedEmail) {
+          setEmail(savedEmail);
+          setRememberEmail(true);
+        }
+      } catch (error) {
+        console.error('Failed to load email from storage', error);
+      }
+    };
+    loadEmail();
+  }, []);
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      if (rememberEmail) {
+        await AsyncStorage.setItem('savedEmail', email);
+      } else {
+        await AsyncStorage.removeItem('savedEmail');
+      }
       navigation.navigate('Home');
     } catch (error) {
       if (error instanceof Error) {
@@ -35,6 +57,10 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     setSecureTextEntry(!secureTextEntry);
   };
 
+  const toggleRememberEmail = () => {
+    setRememberEmail(!rememberEmail);
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -42,6 +68,12 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     >
       <Image source={require('../../assets/logo.jpeg')} style={styles.logo} />
       <Text style={styles.title}>Inicie Sessão</Text>
+      <View style={styles.rememberEmailContainer}>
+        <TouchableOpacity onPress={toggleRememberEmail} style={[styles.switch, rememberEmail && styles.switchActive]}>
+          {rememberEmail && <View style={styles.switchInner} />}
+        </TouchableOpacity>
+        <Text style={styles.rememberEmailText}>Guardar Email</Text>
+      </View>
       <TextInput
         style={styles.input}
         placeholder="e-mail"
@@ -72,7 +104,6 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
       <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
         <Text style={styles.link}>Esqueceu a senha?</Text>
       </TouchableOpacity>
-      <Image source={require('../../assets/agua.png')} style={styles.footerImage} />
     </KeyboardAvoidingView>
   );
 }
@@ -97,6 +128,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: 25,
+  },
+  rememberEmailContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingVertical: 5, // Adiciona padding
+  },
+  switch: {
+    width: 30,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  switchActive: {
+    backgroundColor: '#ffffff',
+  },
+  switchInner: {
+    width: 16,
+    height: 16,
+    backgroundColor: '#1c4e80',
+    borderRadius: 8,
+  },
+  rememberEmailText: {
+    color: '#ffffff',
+    marginLeft: 10,
   },
   input: {
     width: '80%',
@@ -127,7 +186,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    marginBottom: 55,
+    marginBottom: 10,
   },
   buttonText: {
     color: '#ffffff',
@@ -141,10 +200,4 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginTop: 20,
   },
- /* footerImage: {
-    width: '60%',
-    height: 100,  ESQUECE, ESSA IMAGEM TAVA BUGANDO MUITO QUANDO ERA PARA DIGITAR EMAIL OU SENHA
-    position: 'absolute',
-    bottom: 0,
-  }, */
 });

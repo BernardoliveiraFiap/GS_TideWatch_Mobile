@@ -1,15 +1,128 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import MapView, { Marker } from 'react-native-maps';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const initialRegion = {
+  latitude: -24.059582   ,
+  longitude: -46.374337,
+  latitudeDelta: 0.2,
+  longitudeDelta: 0.0,
+};
+
+const helicopterInitialCoordinates = {
+  latitude: -24.056687,
+  longitude: -46.423978,
+};
+
+const recyclingCoordinates = {
+  latitude: -24.057130,
+  longitude: -46.400308,
+};
+
+const boatInitialCoordinates = [
+  { latitude: -24.093037, longitude: -46.404071 },
+  { latitude: -24.100129, longitude: -46.374939 },
+  { latitude: -24.119629, longitude: -46.346778 },
+];
 
 export default function Home() {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
   const [markers, setMarkers] = useState([]);
-  const [selectedMarkerType, setSelectedMarkerType] = useState(null);
-  const [iconsVisible, setIconsVisible] = useState(false);
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  const helicopterAngle = useRef(0);
+  const boatAngles = useRef([0, Math.PI / 2, Math.PI]);
+
+  const loadBoats = async () => {
+    try {
+      const storedBoats = await AsyncStorage.getItem('boats');
+      if (storedBoats) {
+        const boats = JSON.parse(storedBoats);
+        const boatMarkers = boats.map((boat, index) => ({
+          coordinate: boatInitialCoordinates[index] || recyclingCoordinates,
+          key: boat.id,
+          type: 'boat',
+          task: boat.task,
+          boatId: boat.boatId,
+          date: boat.date,
+        }));
+        setMarkers(prevMarkers => [
+          ...prevMarkers.filter(marker => marker.type !== 'boat'),
+          ...boatMarkers,
+        ]);
+        boatAngles.current = boatMarkers.map((_, index) => boatAngles.current[index] || 0);
+      }
+    } catch (error) {
+      console.error('Failed to load boats from storage', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      loadBoats();
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    const moveVehicles = () => {
+      helicopterAngle.current += Math.PI / 180;
+      const helicopterRadius = 0.01;
+      const newHelicopterLatitude = recyclingCoordinates.latitude + helicopterRadius * Math.cos(helicopterAngle.current);
+      const newHelicopterLongitude = recyclingCoordinates.longitude + helicopterRadius * Math.sin(helicopterAngle.current);
+
+      const updatedMarkers = markers.map((marker, index) => {
+        if (marker.type === 'helicopter') {
+          return {
+            ...marker,
+            coordinate: {
+              latitude: isNaN(newHelicopterLatitude) ? marker.coordinate.latitude : newHelicopterLatitude,
+              longitude: isNaN(newHelicopterLongitude) ? marker.coordinate.longitude : newHelicopterLongitude,
+            }
+          };
+        } else if (marker.type === 'boat') {
+          boatAngles.current[index % boatInitialCoordinates.length] += Math.PI / 180 * (index + 1);
+          const boatRadius = 0.01;
+          const initialCoord = boatInitialCoordinates[index % boatInitialCoordinates.length];
+          const newBoatLatitude = initialCoord.latitude + boatRadius * Math.cos(boatAngles.current[index % boatInitialCoordinates.length]);
+          const newBoatLongitude = initialCoord.longitude + boatRadius * Math.sin(boatAngles.current[index % boatInitialCoordinates.length]);
+
+          return {
+            ...marker,
+            coordinate: {
+              latitude: isNaN(newBoatLatitude) ? marker.coordinate.latitude : newBoatLatitude,
+              longitude: isNaN(newBoatLongitude) ? marker.coordinate.longitude : newBoatLongitude,
+            }
+          };
+        }
+        return marker;
+      });
+
+      setMarkers(updatedMarkers);
+    };
+
+    const intervalId = setInterval(moveVehicles, 100);
+
+    return () => clearInterval(intervalId);
+  }, [markers]);
+
+  useEffect(() => {
+    // Initial setup of markers
+    const initialMarkers = [
+      {
+        coordinate: recyclingCoordinates,
+        key: 1,
+        type: 'bottle'  // O marcador inicial é sempre o ícone de reciclagem
+      },
+      {
+        coordinate: helicopterInitialCoordinates,
+        key: 2,
+        type: 'helicopter'  // Adicionar o helicóptero
+      }
+    ];
+    setMarkers(initialMarkers);
+  }, []);
 
   const handleLogout = () => {
     Alert.alert("Logged out", "You have been logged out.");
@@ -17,63 +130,13 @@ export default function Home() {
     navigation.navigate('Login');
   };
 
-  const handleMapPress = (e) => {
-    if (selectedMarkerType) {
-      const newMarker = {
-        coordinate: e.nativeEvent.coordinate,
-        key: markers.length ? markers[markers.length - 1].key + 1 : 1,
-        type: selectedMarkerType,
-      };
-      setMarkers([...markers, newMarker]);
-    } else {
-      Alert.alert("No Marker Selected", "Please select a marker type before adding to the map.");
-    }
-  };
-
-  const handleMarkerPress = (key) => {
-    Alert.alert(
-      "Remove Marker",
-      "Do you want to remove this marker?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: () => {
-            setMarkers(markers.filter(marker => marker.key !== key));
-          }
-        }
-      ]
-    );
-  };
-
-  const toggleIcons = () => {
-    if (iconsVisible) {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        easing: Easing.ease,
-        useNativeDriver: true,
-      }).start(() => setIconsVisible(false));
-      setSelectedMarkerType(null);
-    } else {
-      setIconsVisible(true);
-      Animated.timing(slideAnim, {
-        toValue: 1,
-        duration: 300,
-        easing: Easing.ease,
-        useNativeDriver: true,
-      }).start();
-    }
-  };
-
   const renderMarkerEmoji = (type) => {
     if (type === 'bottle') {
-      return '🍾';
+      return '♻️';  // Emoji de reciclagem
     } else if (type === 'boat') {
       return '⛵';
+    } else if (type === 'helicopter') {
+      return '🚁';
     }
     return '';
   };
@@ -94,54 +157,24 @@ export default function Home() {
       <View style={styles.mapCard}>
         <MapView
           style={styles.map}
-          initialRegion={{
-            latitude: -24.00583,
-            longitude: -46.40278,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          onPress={handleMapPress}
+          initialRegion={initialRegion}
         >
           {markers.map(marker => (
             <Marker
               key={marker.key}
               coordinate={marker.coordinate}
-              onPress={() => handleMarkerPress(marker.key)}
             >
               <Text style={styles.markerEmoji}>{renderMarkerEmoji(marker.type)}</Text>
             </Marker>
           ))}
         </MapView>
-        <Animated.View
-          style={[
-            styles.markerSelector,
-            {
-              transform: [{
-                translateX: slideAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [200, 0]
-                })
-              }]
-            }
-          ]}
-        >
-          <TouchableOpacity onPress={() => setSelectedMarkerType('bottle')}>
-            <Text style={styles.markerThumbnail}>🍾</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedMarkerType('boat')}>
-            <Text style={styles.markerThumbnail}>⛵</Text>
-          </TouchableOpacity>
-        </Animated.View>
-        <TouchableOpacity onPress={toggleIcons} style={styles.toggleButton}>
-          <Text style={styles.toggleButtonText}>{iconsVisible ? '>' : '<'}</Text>
-        </TouchableOpacity>
       </View>
       <View style={styles.footer}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerButton}>
           <Text style={styles.footerText}>Home🏠</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Coleta')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Coleta🗑️</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Coleta', { markers })} style={styles.footerButton}>
+          <Text style={styles.footerText}>Coleta♻️</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Barcos')} style={styles.footerButton}>
           <Text style={styles.footerText}>Barco⛵</Text>
@@ -221,40 +254,16 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     marginBottom: 70,
     marginTop: 10,
-    overflow: 'hidden', // Adicionado para garantir que o mapa respeite as bordas do card
+    overflow: 'hidden',
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  markerSelector: {
-    position: 'absolute',
-    right: 10,
-    top: '40%',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#011633', // Fundo azul escuro
-    padding: 8, // Reduzido em 20%
-    borderRadius: 10,
-  },
-  markerThumbnail: {
-    fontSize: 40, // Reduzido em 20% de 68
-    margin: 8, // Reduzido em 20%
-  },
   markerEmoji: {
-    fontSize: 43, // Reduzido em 20% de 40
+    fontSize: 40,
   },
-  toggleButton: {
-    position: 'absolute',
-    right: 2,
-    top: '50%',
-    backgroundColor: '#1c4e80',
-    borderRadius: 25,
-    padding: 8, // Reduzido em 20%
-  },
-  toggleButtonText: {
-    fontSize: 20,
-    color: '#ffffff',
+  helicopterEmoji: {
+    fontSize: 38,
   },
   footer: {
     flexDirection: 'row',
