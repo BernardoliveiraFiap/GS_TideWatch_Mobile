@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Image, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from './../services/firebaseConfig';
+import { collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, query } from 'firebase/firestore';
 
 export default function Barcos() {
   const navigation = useNavigation();
@@ -12,20 +13,17 @@ export default function Barcos() {
   const [date, setDate] = useState('');
   const [selectedBoat, setSelectedBoat] = useState(null);
 
-  const loadBoats = async () => {
-    try {
-      const storedBoats = await AsyncStorage.getItem('boats');
-      if (storedBoats) {
-        setBoats(JSON.parse(storedBoats));
-      }
-    } catch (error) {
-      console.error('Failed to load boats from storage', error);
-    }
-  };
-
   useEffect(() => {
     if (isFocused) {
-      loadBoats();
+      const q = query(collection(db, 'boats'));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const boatsData = [];
+        snapshot.forEach((doc) => {
+          boatsData.push({ id: doc.id, ...doc.data() });
+        });
+        setBoats(boatsData);
+      });
+      return () => unsubscribe();
     }
   }, [isFocused]);
 
@@ -34,40 +32,35 @@ export default function Barcos() {
       Alert.alert('Limite Atingido', 'Limite máximo de 3 barcos');
       return;
     }
-    const newBoat = { id: Date.now().toString(), task, boatId, date };
-    const updatedBoats = [...boats, newBoat];
-    setBoats(updatedBoats);
     try {
-      await AsyncStorage.setItem('boats', JSON.stringify(updatedBoats));
-      navigation.navigate('Home', { addingBoat: true });
+      const newBoat = { task, boatId, date };
+      await addDoc(collection(db, 'boats'), newBoat);
+      setTask('');
+      setBoatId('');
+      setDate('');
     } catch (error) {
-      console.error('Failed to save boat to storage', error);
+      console.error('Erro ao adicionar barco', error);
     }
   };
 
   const updateBoat = async () => {
-    const updatedBoats = boats.map(boat => 
-      boat.id === selectedBoat.id ? { ...boat, task, boatId, date } : boat
-    );
-    setBoats(updatedBoats);
     try {
-      await AsyncStorage.setItem('boats', JSON.stringify(updatedBoats));
+      const boatDocRef = doc(db, 'boats', selectedBoat.id);
+      await updateDoc(boatDocRef, { task, boatId, date });
       setSelectedBoat(null);
       setTask('');
       setBoatId('');
       setDate('');
     } catch (error) {
-      console.error('Failed to update boat in storage', error);
+      console.error('Erro ao atualizar barco', error);
     }
   };
 
   const removeBoat = async (id) => {
-    const updatedBoats = boats.filter(boat => boat.id !== id);
-    setBoats(updatedBoats);
     try {
-      await AsyncStorage.setItem('boats', JSON.stringify(updatedBoats));
+      await deleteDoc(doc(db, 'boats', id));
     } catch (error) {
-      console.error('Failed to remove boat from storage', error);
+      console.error('Erro ao remover barco', error);
     }
   };
 
@@ -243,14 +236,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   footer: {
-    position: 'absolute',
-    bottom: 9,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     width: '100%',
+    backgroundColor: '#011633',
+    paddingVertical: 10,
+    position: 'absolute',
+    bottom: 0,
   },
   footerButton: {
     padding: 10,
+    alignItems: 'center',
   },
   footerText: {
     fontSize: 16,

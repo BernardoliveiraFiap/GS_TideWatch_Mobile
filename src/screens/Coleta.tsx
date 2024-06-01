@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, ImageBackground, Image } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from './../services/firebaseConfig';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function Coleta() {
   const navigation = useNavigation();
@@ -12,31 +13,27 @@ export default function Coleta() {
   const infoAnimation = useRef(new Animated.Value(-500)).current; // Initial value for Y-axis translation
 
   useEffect(() => {
-    const loadBoats = async () => {
-      try {
-        const storedBoats = await AsyncStorage.getItem('boats');
-        if (storedBoats) {
-          setBoats(JSON.parse(storedBoats));
-        }
-      } catch (error) {
-        console.error('Failed to load boats from storage', error);
-      }
-    };
-
-    const loadMarkers = async () => {
-      try {
-        const storedMarkers = await AsyncStorage.getItem('markers');
-        if (storedMarkers) {
-          setMarkers(JSON.parse(storedMarkers));
-        }
-      } catch (error) {
-        console.error('Failed to load markers from storage', error);
-      }
-    };
-
     if (isFocused) {
-      loadBoats();
-      loadMarkers();
+      const unsubscribeBoats = onSnapshot(collection(db, 'boats'), (snapshot) => {
+        const boatsData = [];
+        snapshot.forEach((doc) => {
+          boatsData.push({ id: doc.id, ...doc.data() });
+        });
+        setBoats(boatsData);
+      });
+
+      const unsubscribeMarkers = onSnapshot(collection(db, 'markers'), (snapshot) => {
+        const markersData = [];
+        snapshot.forEach((doc) => {
+          markersData.push({ id: doc.id, ...doc.data() });
+        });
+        setMarkers(markersData);
+      });
+
+      return () => {
+        unsubscribeBoats();
+        unsubscribeMarkers();
+      };
     }
   }, [isFocused]);
 
