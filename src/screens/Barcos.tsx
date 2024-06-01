@@ -31,7 +31,7 @@ export default function Barcos() {
 
   const addBoat = async () => {
     if (boats.length >= 3) {
-      Alert.alert('Limit Exceeded', 'You can only add up to 3 boats.');
+      Alert.alert('Limite Atingido', 'Limite máximo de 3 barcos');
       return;
     }
     const newBoat = { id: Date.now().toString(), task, boatId, date };
@@ -123,7 +123,7 @@ export default function Barcos() {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={addBoat} style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add Boat</Text>
+            <Text style={styles.addButtonText}>Adicionar Barco</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -138,10 +138,10 @@ export default function Barcos() {
           <Text style={styles.footerText}>Home🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Coleta')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Coleta🗑️</Text>
+          <Text style={styles.footerText}>Coleta♻️</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Barcos')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Barco⛵</Text>
+          <Text style={styles.footerText}>Barcos⛵</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     alignItems: 'center',
+    marginTop: 20
   },
   headerText: {
     color: '#ffffff',
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    backgroundColor: '#1c4e80',
+    backgroundColor: '#ede8fb',
     color: '#ffffff',
     padding: 10,
     borderRadius: 5,

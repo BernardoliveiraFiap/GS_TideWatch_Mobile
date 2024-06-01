@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import MapView, { Marker } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const initialRegion = {
-  latitude: -24.059582   ,
+  latitude: -24.059582,
   longitude: -46.374337,
   latitudeDelta: 0.2,
   longitudeDelta: 0.0,
@@ -31,6 +31,10 @@ export default function Home() {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [legendVisible, setLegendVisible] = useState(false);
+  const popupAnimation = useRef(new Animated.Value(500)).current; // Initial value for Y-axis translation
+  const legendAnimation = useRef(new Animated.Value(0)).current; // Initial value for X-axis translation
   const [markers, setMarkers] = useState([]);
   const helicopterAngle = useRef(0);
   const boatAngles = useRef([0, Math.PI / 2, Math.PI]);
@@ -125,9 +129,41 @@ export default function Home() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert("Logged out", "You have been logged out.");
+    Alert.alert("Logged out", "Você saiu! faça login novamente quando quiser.");
     setModalVisible(false);
     navigation.navigate('Login');
+  };
+
+  const handleOpenPopup = () => {
+    setPopupVisible(true);
+    Animated.timing(popupAnimation, {
+      toValue: 0,
+      duration: 500,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleClosePopup = () => {
+    Animated.timing(popupAnimation, {
+      toValue: -500,
+      duration: 500,
+      easing: Easing.in(Easing.ease),
+      useNativeDriver: true,
+    }).start(() => {
+      setPopupVisible(false);
+      popupAnimation.setValue(500); // Reset the animation value for the next time the popup opens
+    });
+  };
+
+  const toggleLegend = () => {
+    setLegendVisible(!legendVisible);
+    Animated.timing(legendAnimation, {
+      toValue: legendVisible ? 0 : -150,
+      duration: 500,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
   };
 
   const renderMarkerEmoji = (type) => {
@@ -144,8 +180,8 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Text style={styles.icon}>🔍</Text>
+        <TouchableOpacity style={styles.iconButton} onPress={handleOpenPopup}>
+          <Text style={styles.icon}>🗺️</Text>
         </TouchableOpacity>
         <View style={styles.realTimeContainer}>
           <Text style={styles.realTimeText}>Tempo Real</Text>
@@ -168,6 +204,18 @@ export default function Home() {
             </Marker>
           ))}
         </MapView>
+        <Animated.View style={[styles.legendContainer, { transform: [{ translateX: legendAnimation }] }]}>
+          <TouchableOpacity style={styles.toggleButton} onPress={toggleLegend}>
+            <Text style={styles.toggleButtonText}>{legendVisible ? '>' : '<'}</Text>
+          </TouchableOpacity>
+          {legendVisible && (
+            <View style={styles.legendContent}>
+              <Text style={styles.legendText}>♻️ Lixo marinho</Text>
+              <Text style={styles.legendText}>⛵ Barco  automatizado que coleta o lixo</Text>
+              <Text style={styles.legendText}>🚁 Helicóptero que identifica o lixo e reporta  para os barcos</Text>
+            </View>
+          )}
+        </Animated.View>
       </View>
       <View style={styles.footer}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.footerButton}>
@@ -177,7 +225,7 @@ export default function Home() {
           <Text style={styles.footerText}>Coleta♻️</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Barcos')} style={styles.footerButton}>
-          <Text style={styles.footerText}>Barco⛵</Text>
+          <Text style={styles.footerText}>Barcos⛵</Text>
         </TouchableOpacity>
       </View>
       <Modal
@@ -206,6 +254,14 @@ export default function Home() {
           </View>
         </View>
       </Modal>
+      {popupVisible && (
+        <Animated.View style={[styles.popupView, { transform: [{ translateY: popupAnimation }] }]}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClosePopup}>
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          <Text style={styles.popupText}>📍🗺️ Projeto de limpeza na praia grande (Atlantic Ocean)</Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -320,5 +376,79 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+  },
+  popupView: {
+    position: 'absolute',
+    bottom: '50%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  popupText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 15,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 5,
+    backgroundColor: 'red',
+    borderRadius: 15,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  legendContainer: {
+    position: 'absolute',
+    top: '30%',
+    right: -150, // Start hidden
+    width: 150,
+    height: 200,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  toggleButton: {
+    position: 'absolute',
+    top: 10,
+    left: -30,
+    padding: 5,
+    backgroundColor: 'blue',
+    borderRadius: 15,
+  },
+  toggleButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  legendContent: {
+    marginTop: 20,
+  },
+  legendText: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });

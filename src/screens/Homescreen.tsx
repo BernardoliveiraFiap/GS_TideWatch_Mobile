@@ -16,7 +16,8 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     const loadEmail = async () => {
       try {
         const savedEmail = await AsyncStorage.getItem('savedEmail');
-        if (savedEmail) {
+        const remember = await AsyncStorage.getItem('rememberEmail');
+        if (savedEmail && remember === 'true') {
           setEmail(savedEmail);
           setRememberEmail(true);
         }
@@ -32,8 +33,10 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
       await signInWithEmailAndPassword(auth, email, password);
       if (rememberEmail) {
         await AsyncStorage.setItem('savedEmail', email);
+        await AsyncStorage.setItem('rememberEmail', 'true');
       } else {
         await AsyncStorage.removeItem('savedEmail');
+        await AsyncStorage.setItem('rememberEmail', 'false');
       }
       navigation.navigate('Home');
     } catch (error) {
@@ -57,8 +60,16 @@ export default function Homescreen({ navigation }: LoginScreenProps) {
     setSecureTextEntry(!secureTextEntry);
   };
 
-  const toggleRememberEmail = () => {
-    setRememberEmail(!rememberEmail);
+  const toggleRememberEmail = async () => {
+    const newRememberEmail = !rememberEmail;
+    setRememberEmail(newRememberEmail);
+    if (newRememberEmail) {
+      await AsyncStorage.setItem('savedEmail', email);
+      await AsyncStorage.setItem('rememberEmail', 'true');
+    } else {
+      await AsyncStorage.removeItem('savedEmail');
+      await AsyncStorage.setItem('rememberEmail', 'false');
+    }
   };
 
   return (
@@ -133,7 +144,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    paddingVertical: 5, // Adiciona padding
+    paddingVertical: 5,
   },
   switch: {
     width: 30,
