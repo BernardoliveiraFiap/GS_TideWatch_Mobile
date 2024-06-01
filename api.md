@@ -74,8 +74,11 @@ Parâmetros de Requisição: Nenhum
 # Coleta
 GET /api/collection
 Descrição: Retorna dados de barcos existentes em tempo real.
-
-
+---------------------------------------------------------------------
+# Exclusão de Conta
+DELETE /api/users/{id}
+Deletar Conta de Usuário
+Descrição: Remove a conta de um usuário específico do Firebase. Este endpoint exige autenticação.
 
 ### Explicação
 
