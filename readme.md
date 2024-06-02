@@ -3,7 +3,7 @@
 
 ---
 
-## VÍDEO DE APRESENTAÇÃO DA IDEIA/PROJETO MOBILE: **EM BREVE**
+## VÍDEO DE APRESENTAÇÃO DA IDEIA/PROJETO MOBILE: (https://www.youtube.com/watch?v=phQFoTnZAgM)
 
 ---
 
