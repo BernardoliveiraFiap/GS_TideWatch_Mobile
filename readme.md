@@ -1,5 +1,22 @@
 # Global Solution TIDEWATCH
-## Por uma marinha mais limpa!
+
+#DevOps
+Criando a imagem docker
+docker-compose up --build
+ 
+ 
+# Passo 1: Iniciar o Container em Modo Destacado
+docker-compose up -d
+ 
+# Passo 2: Verificar o Status do Container
+docker ps
+ 
+Parar os containers:
+docker-compose down
+ 
+ 
+Reiniciar os containers:
+docker-compose restart
 
 ---
 
